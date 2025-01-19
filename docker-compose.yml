@@ -1,0 +1,68 @@
+version: '3.8'
+services:
+  user-service:
+    build:
+      context: ./services/user-service
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+    depends_on:
+      - mysql
+      - rabbitmq
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    ports:
+      - "5002:5002"
+    environment:
+      - NODE_ENV=development
+      - PORT=5002
+    depends_on:
+      - mongodb
+      - rabbitmq
+
+  recommendation-service:
+    build:
+      context: ./services/recommendation-service
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=development
+      - PORT=5003
+    depends_on:
+      - mysql
+      - rabbitmq
+
+  graphql-gateway:
+    build:
+      context: ./graphql-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+    depends_on:
+      - user-service
+      - notification-service
+      - recommendation-service
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
